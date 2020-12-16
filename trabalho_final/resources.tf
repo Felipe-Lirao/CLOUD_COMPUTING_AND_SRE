@@ -4,6 +4,7 @@ provider "aws" {
 
 locals {
   env = "${terraform.workspace}"
+  emails = "danielcorvello@gmail.com"
 }
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -31,6 +32,14 @@ resource "aws_sqs_queue" "sqs_dlq_queue" {
 
 resource "aws_sns_topic" "sns_principal" {
     name = "sns-principal-${local.env}"
+    
+    provisioner "local-exec" {
+        command = "sh sns_subscription.sh"
+        environment = {
+            sns_arn = self.arn
+            sns_emails = "${local.emails}"
+        }
+    }
 }
 
 # ---------------------------------------------------------------------------------------------------------------------
