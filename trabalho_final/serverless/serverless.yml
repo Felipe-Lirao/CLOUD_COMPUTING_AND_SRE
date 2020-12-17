@@ -1,0 +1,15 @@
+service: aws-python3 # NOTE: update this with your service name
+
+provider:
+  name: aws
+  runtime: python3.6
+
+# you can overwrite defaults here
+stage: production
+functions:
+  readCustomer:
+    handler: insertFila.insert
+    events:
+      - http:
+          path: parametros/{mensagem}
+          method: get
