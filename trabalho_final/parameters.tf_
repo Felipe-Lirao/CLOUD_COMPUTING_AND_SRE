@@ -1,0 +1,32 @@
+
+'''
+resource "aws_ssm_parameter" "arn_sqs" {
+  name        = "/${terraform.workspace}/queue/sqs/arn"
+  value       = "${aws_sqs_queue.sqs_principal.arn}"
+  type        = "String"
+}
+
+resource "aws_ssm_parameter" "url_sqs" {
+  name        = "/${terraform.workspace}/queue/sqs/url"
+  value       = "${aws_sqs_queue.sqs_principal.id}"
+  type        = "String"
+}
+
+resource "aws_ssm_parameter" "arn_sqs_dlq" {
+  name        = "/${terraform.workspace}/queue/dlq/arn"
+  value       = "${aws_sqs_queue.sqs_dlq_queue.arn}"
+  type        = "String"
+}
+
+resource "aws_ssm_parameter" "url_sqs_dlq" {
+  name        = "/${terraform.workspace}/queue/dlq/url"
+  value       = "${aws_sqs_queue.sqs_dlq_queue.id}"
+  type        = "String"
+}
+
+resource "aws_ssm_parameter" "arn_sns" {
+  name        = "/${terraform.workspace}/topic/arn"
+  value       = "${aws_sns_topic.sns_principal.arn}"
+  type        = "String"
+}
+'''

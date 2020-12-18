@@ -1,5 +1,9 @@
 service: aoj75 # NOTE: update this with your service name
 
+custom:
+  stage: ${opt:stage, self:provider.stage}
+  account: 661057543625
+
 provider:
   name: aws
   stage: dev
@@ -13,40 +17,46 @@ provider:
         - sqs:ReceiveMessage
         - sqs:SendMessage
         - sns:Publish
+        - xray:PutTraceSegments
+        - xray:PutTelemetryRecords
       Resource: 
-        - "arn:aws:sqs:us-east-1:*:sqs-*"
-        - "arn:aws:sns:us-east-1:*:sns-*"
+        - "*"
   environment:
-      sqs_url: https://sqs.us-east-1.amazonaws.com/661057543625/sqs-principal-dev
-      sqs_arn: arn:aws:sqs:us-east-1:661057543625:sqs-principal-dev
-      sqs_dlq_url: https://sqs.us-east-1.amazonaws.com/661057543625/sqs-dlq-queue-dev
-      sqs_dlq_arn: arn:aws:sqs:us-east-1:661057543625:sqs-dlq-queue-dev
-      sns_arn: arn:aws:sns:us-east-1:661057543625:sns-principal-dev
+      sqs_url: https://sqs.us-east-1.amazonaws.com/${self:custom.account}/sqs-principal-${self:custom.stage} # ${ssm:/${self:custom.stage}/queue/sqs/url} # 
+      sqs_arn: arn:aws:sqs:us-east-1:${self:custom.account}:sqs-principal-${self:custom.stage} # ${ssm:/${self:custom.stage}/queue/sqs/arn} # 
+      sqs_dlq_url: https://sqs.us-east-1.amazonaws.com/${self:custom.account}/sqs-dlq-queue-${self:custom.stage} # ${ssm:/${self:custom.stage}/queue/dlq/url} #
+      sqs_dlq_arn: arn:aws:sqs:us-east-1:${self:custom.account}:sqs-dlq-queue-${self:custom.stage} # ${ssm:/${self:custom.stage}/queue/dlq/arn} #
+      sns_arn: arn:aws:sns:us-east-1:${self:custom.account}:sns-principal-${self:custom.stage} # ${ssm:/${self:custom.stage}/topic/arn} #
+  tracing:
+    apiGateway: true
+    lambda: true
 package:
   exclude:
     - layer/**
       
 layers:
-  boto:
+  Dependencias:
     path: layer
-    description: 'boto layer'
+    description: 'dependências'
       
 functions:
   insereSQS:
     handler: insereSQS.insert
+    layers:
+      - {Ref: DependenciasLambdaLayer }
     events:
       - http:
           path: inseresqs/{mensagem}
           method: get
   leSQS:
     handler: leSQS.le
-    #events:
-    #  - sqs: arn:aws:sqs:us-east-1:661057543625:sqs-principal-dev
+    layers:
+      - {Ref: DependenciasLambdaLayer }
   pushSNS:
     handler: pushtosns.push
     layers:
-      - {Ref: BotoLambdaLayer }
-    events:
-      - sqs: arn:aws:sqs:us-east-1:661057543625:sqs-dlq-queue-dev
+      - {Ref: DependenciasLambdaLayer }
+    #events:
+    #  - sqs: arn:aws:sqs:us-east-1:${self:custom.account}:sqs-dlq-queue-${self:custom.stage} #arn:aws:sqs:us-east-1:661057543625:sqs-dlq-queue-dev
     
     

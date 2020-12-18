@@ -1,6 +1,17 @@
+import sys
+sys.path.insert(0, '/opt')
+
 from sqsHandler import SqsHandler
 from env import Variables
 import boto3
+
+from aws_xray_sdk.core import xray_recorder
+from aws_xray_sdk.core import patch_all
+
+xray_recorder.configure(service='pushSNS')
+#plugins = ('ElasticBeanstalkPlugin', 'EC2Plugin')
+#xray_recorder.configure(plugins=plugins)
+patch_all()
 
 def push(event, context):
     # Create an SNS client
@@ -23,13 +34,14 @@ def push(event, context):
             # Publish a simple message to the specified SNS topic
             retorno = sns.publish(
                 TopicArn = env.get_sns_arn(),
-                Message = msg['Body'],
+                Message = str(msg['Body']),
             )
-            
-            sqs.deleteMessage(msg["ReceiptHandle"])
-            
             # Print out the response
             print(retorno)
+            
+            print('Deletando mensagem')
+            sqs.deleteMessage(msg["ReceiptHandle"])
+            
             
 '''
     for record in event['Records']:
@@ -39,11 +51,13 @@ def push(event, context):
     
         retorno = sns.publish(
             TopicArn = env.get_sns_arn(),
-            Message = record["body"],
+            Message = str(record["body"]),
         )
         
         sqs.deleteMessage(record["receipthandle"])
     
+    
 '''    
+    
     
     
