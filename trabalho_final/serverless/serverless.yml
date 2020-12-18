@@ -1,8 +1,15 @@
-service: aoj75 # NOTE: update this with your service name
+# install serverless pseudo paramteres plugin
+# npm install serverless-pseudo-parameters
+
+# sls deploy --stage {name}
+
+service: aoj75 
+
+plugins:
+  - serverless-pseudo-parameters
 
 custom:
   stage: ${opt:stage, self:provider.stage}
-  account: 661057543625
 
 provider:
   name: aws
@@ -22,11 +29,11 @@ provider:
       Resource: 
         - "*"
   environment:
-      sqs_url: https://sqs.us-east-1.amazonaws.com/${self:custom.account}/sqs-principal-${self:custom.stage} # ${ssm:/${self:custom.stage}/queue/sqs/url} # 
-      sqs_arn: arn:aws:sqs:us-east-1:${self:custom.account}:sqs-principal-${self:custom.stage} # ${ssm:/${self:custom.stage}/queue/sqs/arn} # 
-      sqs_dlq_url: https://sqs.us-east-1.amazonaws.com/${self:custom.account}/sqs-dlq-queue-${self:custom.stage} # ${ssm:/${self:custom.stage}/queue/dlq/url} #
-      sqs_dlq_arn: arn:aws:sqs:us-east-1:${self:custom.account}:sqs-dlq-queue-${self:custom.stage} # ${ssm:/${self:custom.stage}/queue/dlq/arn} #
-      sns_arn: arn:aws:sns:us-east-1:${self:custom.account}:sns-principal-${self:custom.stage} # ${ssm:/${self:custom.stage}/topic/arn} #
+      sqs_url: https://sqs.us-east-1.amazonaws.com/#{AWS::AccountId}/sqs-principal-${self:custom.stage} # ${ssm:/${self:custom.stage}/queue/sqs/url} # 
+      sqs_arn: arn:aws:sqs:us-east-1:#{AWS::AccountId}:sqs-principal-${self:custom.stage} # ${ssm:/${self:custom.stage}/queue/sqs/arn} # 
+      sqs_dlq_url: https://sqs.us-east-1.amazonaws.com/#{AWS::AccountId}/sqs-dlq-queue-${self:custom.stage} # ${ssm:/${self:custom.stage}/queue/dlq/url} #
+      sqs_dlq_arn: arn:aws:sqs:us-east-1:#{AWS::AccountId}:sqs-dlq-queue-${self:custom.stage} # ${ssm:/${self:custom.stage}/queue/dlq/arn} #
+      sns_arn: arn:aws:sns:us-east-1:#{AWS::AccountId}:sns-principal-${self:custom.stage} # ${ssm:/${self:custom.stage}/topic/arn} #
   tracing:
     apiGateway: true
     lambda: true
@@ -57,6 +64,6 @@ functions:
     layers:
       - {Ref: DependenciasLambdaLayer }
     #events:
-    #  - sqs: arn:aws:sqs:us-east-1:${self:custom.account}:sqs-dlq-queue-${self:custom.stage} #arn:aws:sqs:us-east-1:661057543625:sqs-dlq-queue-dev
+    #  - sqs: arn:aws:sqs:us-east-1:#{AWS::AccountId}:sqs-dlq-queue-${self:custom.stage}
     
     

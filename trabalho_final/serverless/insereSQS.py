@@ -18,6 +18,9 @@ def insert(event, context):
     
     env = Variables()
     sqs = SqsHandler(env.get_sqs_url())
+    
+    print(str(env.get_sqs_url()))
+    
     mensagem = event['pathParameters']['mensagem'];
 
     sqs.send(mensagem)

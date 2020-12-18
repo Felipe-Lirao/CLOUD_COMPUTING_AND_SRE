@@ -2,9 +2,14 @@ provider "aws" {
   region = "us-east-1"
 }
 
+variable "email_subscription" {
+  type        = string
+  description = "Endereço de e-mail para inscrição no SNS."
+}
+
 locals {
   env = "${terraform.workspace}"
-  emails = "danielcorvello@gmail.com"
+  emails = var.email_subscription
 }
 
 # ---------------------------------------------------------------------------------------------------------------------
