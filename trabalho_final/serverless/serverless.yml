@@ -1,15 +1,52 @@
-service: aws-python3 # NOTE: update this with your service name
+service: aoj75 # NOTE: update this with your service name
 
 provider:
   name: aws
+  stage: dev
   runtime: python3.6
-
-# you can overwrite defaults here
-stage: production
+  memorySize: 128
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - sqs:ChangeMessageVisibility
+        - sqs:DeleteMessage
+        - sqs:ReceiveMessage
+        - sqs:SendMessage
+        - sns:Publish
+      Resource: 
+        - "arn:aws:sqs:us-east-1:*:sqs-*"
+        - "arn:aws:sns:us-east-1:*:sns-*"
+  environment:
+      sqs_url: https://sqs.us-east-1.amazonaws.com/661057543625/sqs-principal-dev
+      sqs_arn: arn:aws:sqs:us-east-1:661057543625:sqs-principal-dev
+      sqs_dlq_url: https://sqs.us-east-1.amazonaws.com/661057543625/sqs-dlq-queue-dev
+      sqs_dlq_arn: arn:aws:sqs:us-east-1:661057543625:sqs-dlq-queue-dev
+      sns_arn: arn:aws:sns:us-east-1:661057543625:sns-principal-dev
+package:
+  exclude:
+    - layer/**
+      
+layers:
+  boto:
+    path: layer
+    description: 'boto layer'
+      
 functions:
-  readCustomer:
-    handler: insertFila.insert
+  insereSQS:
+    handler: insereSQS.insert
     events:
       - http:
-          path: parametros/{mensagem}
+          path: inseresqs/{mensagem}
           method: get
+  leSQS:
+    handler: leSQS.le
+    #events:
+    #  - sqs: arn:aws:sqs:us-east-1:661057543625:sqs-principal-dev
+  pushSNS:
+    handler: pushtosns.push
+    layers:
+      - {Ref: BotoLambdaLayer }
+    events:
+      - sqs: arn:aws:sqs:us-east-1:661057543625:sqs-dlq-queue-dev
+    
+    

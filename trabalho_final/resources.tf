@@ -13,7 +13,7 @@ locals {
 
 resource "aws_sqs_queue" "sqs_principal" {
     name = "sqs-principal-${local.env}"
-    redrive_policy  = "{\"deadLetterTargetArn\":\"${aws_sqs_queue.sqs_dlq_queue.arn}\",\"maxReceiveCount\":5}"
+    redrive_policy  = "{\"deadLetterTargetArn\":\"${aws_sqs_queue.sqs_dlq_queue.arn}\",\"maxReceiveCount\":1}"
     visibility_timeout_seconds = 300
 
     tags = {
